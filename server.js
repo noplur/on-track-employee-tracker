@@ -20,7 +20,10 @@ const db = new sqlite3.Database('./db/departments.db', err => {
 
 // Get all departments 
 app.get('/api/departments', (req, res) => {
-  const sql =  `SELECT * FROM departments`;
+  const sql = `SELECT roles.*, departments.depName
+              FROM roles
+              LEFT JOIN departments
+              ON roles.department_id = departments.id`;
   const params = [];
   db.all(sql, params, (err, rows) => {
     if (err) {
@@ -37,8 +40,11 @@ app.get('/api/departments', (req, res) => {
 
 // Get single departments
 app.get('/api/departments/:id', (req, res) => {
-  const sql = `SELECT * FROM departments 
-               WHERE id = ?`;
+  const sql = `SELECT roles.*, departments.depName
+              FROM roles
+              LEFT JOIN departments
+              ON roles.department_id = departments.id
+              WHERE departments.id = ?`;
   const params = [req.params.id];
   db.get(sql, params, (err, row) => {
     if (err) {
