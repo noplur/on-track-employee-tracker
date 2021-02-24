@@ -59,6 +59,42 @@ app.get('/api/departments/:id', (req, res) => {
   });
 });
 
+// Get all roles
+
+app.get('/api/roles', (req, res) => {
+  const sql = `SELECT * FROM roles`;
+  const params = [];
+  db.all(sql, params, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+
+    res.json({
+      message: 'success',
+      data: rows
+    });
+  });
+});
+
+// Get single role
+
+app.get('/api/roles/:id', (req, res) => {
+  const sql = `SELECT * FROM roles WHERE id = ?`;
+  const params = [req.params.id];
+  db.get(sql, params, (err, row) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+
+    res.json({
+      message: 'success',
+      data: row
+    });
+  });
+});
+
 // Create a departments
 app.post('/api/departments', ({ body }, res) => {
   const errors = inputCheck(body, 'depName');
@@ -85,10 +121,53 @@ app.post('/api/departments', ({ body }, res) => {
   });
 });
 
+// Update a role's party
+
+app.put('/api/roles/:id', (req, res) => {
+  // Role is allowed to not have department affiliation
+    const errors = inputCheck(req.body, 'department_id');
+    if (errors) {
+      res.status(400).json({ error: errors });
+      return;
+    }
+  
+    const sql = `UPDATE roles SET department_id = ? 
+                 WHERE id = ?`;
+    const params = [req.body.department_id, req.params.id];
+    // function,not arrow, to use this
+    db.run(sql, params, function(err, result) {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+  
+      res.json({
+        message: 'success',
+        data: req.body,
+        changes: this.changes
+      });
+    });
+  });
+
 // Delete a departments
 app.delete('/api/departments/:id', (req, res) => {
   const sql = `DELETE FROM departments WHERE id = ?`;
   const params = [req.params.id]
+  db.run(sql, params, function(err, result) {
+    if (err) {
+      res.status(400).json({ error: res.message });
+      return;
+    }
+
+    res.json({ message: 'successfully deleted', changes: this.changes });
+  });
+});
+
+// Delete a roles
+
+app.delete('/api/roles/:id', (req, res) => {
+  const sql = `DELETE FROM roles WHERE id = ?`;
+  const params = [req.params.id];
   db.run(sql, params, function(err, result) {
     if (err) {
       res.status(400).json({ error: res.message });
