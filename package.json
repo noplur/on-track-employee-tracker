@@ -2,13 +2,13 @@
   "name": "on-track-employee-tracker",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
     "test": "jest",
-    "migrate": "mysql db/departments.db < db/schema.sql",
-    "seed": "mysql db/departments.db < db/seeds.sql",
+    "migrate": "mysql source db/departments.db < db/schema.sql",
+    "seed": "mysql source db/departments.db < db/seeds.sql",
     "db": "mysql db/departments.db",
-    "start": "node app.js"
+    "start": "node start.js"
   },
   "repository": {
     "type": "git",
