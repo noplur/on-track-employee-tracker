@@ -4,7 +4,8 @@ const db = require('./db/database');
 const express = require('express');
 const inputCheck = require('./utils/inputCheck');
 const apiRoutes = require('./routes/apiRoutes');
-const startApp = require('./start')
+const startApp = require('./start');
+const ExpandPrompt = require("inquirer/lib/prompts/expand");
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -62,9 +63,29 @@ function main () {
         
     })
 }
+// answer[i].id + " " + 
+const employeeList = [];
+  connection.query("SELECT * FROM employees", function(err, answer) {
+    // console.log(answer);
+    for (let i = 0; i < answer.length; i++) {
+      let employeeString =
+        answer[i].id + " " + answer[i].first_name + " " + answer[i].last_name;
+        employeeList.push(employeeString);
+    }
+  })
+
+const roleList = [];
+  connection.query("SELECT * FROM roles", function(err, answer) {
+    // console.log(answer);
+    for (let i = 0; i < answer.length; i++) {
+      let roleString =
+      answer[i].id + " " + answer[i].title;
+        roleList.push(roleString);
+    }
+  })
 
 function viewAllEmployees () {
-    const sql = `SELECT employees.*, roles.title, roles.salary, departments.depName
+    const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.depName, roles.salary, employees.manager_id
     FROM employees
     LEFT JOIN roles
     ON employees.role_id = roles.id
@@ -77,7 +98,7 @@ function viewAllEmployees () {
 }
 
 function viewAllRoles () {
-    const sql = `SELECT roles.*, departments.depName
+    const sql = `SELECT roles.id, roles.title, roles.salary, departments.depName
     FROM roles
     LEFT JOIN departments
     ON roles.department_id = departments.id`;
@@ -94,6 +115,8 @@ function viewAllDepartments () {
         main()
     })
 }
+
+// make manager id actual manager name
 function addEmployee () {
     inquirer.prompt([
         {
@@ -163,10 +186,29 @@ function addRole () {
 }
 
 function updateRole () {
-    connection.promise().query("select * from Departments").then(data => {
-        console.table(data[0])
-        main()
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "employee",
+            message: "Select the employee you would like to update.",
+            choices: employeeList
+        },
+        {
+            type: "list",
+            name: "role",
+            message: "Select the employee's updated role.",
+            choices: roleList
+        },
+    ]).then((answers) => {
+        let roleIndex = roleList.indexOf(answers.role) + 1;
+        let employeeIndex = employeeList.indexOf(answers.employee) + 1;
+        console.log(roleIndex, employeeIndex)
+        // fix promise query
+    connection.promise().query(`UPDATE employees SET employees.role_id = ? WHERE employees.id= ?`, [roleIndex, employeeIndex]).then(data => {
+        console.log("updated employee role; " + (data[0].affectedRows))
+        main ()
     })
+})
 }
 
 main()
