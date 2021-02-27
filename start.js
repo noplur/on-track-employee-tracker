@@ -95,10 +95,33 @@ function viewAllDepartments () {
     })
 }
 function addEmployee () {
-    connection.promise().query("select * from Departments").then(data => {
-        console.table(data[0])
-        main()
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "first_name",
+            message: "What is the employee's first name?"
+        },
+        {
+            type: "input",
+            name: "last_name",
+            message: "What is the employee's last name?"
+        },
+        {
+            type: "input",
+            name: "role_id",
+            message: "What is the role id for this employee?"
+        },
+        {
+            type: "input",
+            name: "manager_id",
+            message: "What is the manager id for this employee?"
+        },
+    ]).then((answers) => {
+    connection.promise().query(`INSERT INTO employees set ?`, answers).then(data => {
+        console.log("inserted employees; " + (+data[0].affectedRows > 0))
+        main ()
     })
+})
 }
 function addDepartment () {
     inquirer.prompt([
