@@ -84,6 +84,26 @@ const roleList = [];
     }
   })
 
+const departmentList = [];
+  connection.query("SELECT * FROM departments", function(err, answer) {
+    // console.log(answer);
+    for (let i = 0; i < answer.length; i++) {
+      let departmentString =
+      answer[i].id + " " + answer[i].depName;
+      departmentList.push(departmentString);
+    }
+  })
+
+const managerList = [];
+  connection.query("SELECT * FROM employees", function(err, answer) {
+    // console.log(answer);
+    for (let i = 0; i < answer.length; i++) {
+      let managerString =
+      answer[i].id + " " + answer[i].manager_id;
+      managerList.push(managerString);
+    }
+  })
+
 function viewAllEmployees () {
     const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.depName, roles.salary, employees.manager_id
     FROM employees
@@ -135,9 +155,10 @@ function addEmployee () {
             message: "What is the role id for this employee?"
         },
         {
-            type: "input",
+            type: "list",
             name: "manager_id",
-            message: "What is the manager id for this employee?"
+            message: "What is the manager id for this employee?",
+            choices: managerList
         },
     ]).then((answers) => {
     connection.promise().query(`INSERT INTO employees set ?`, answers).then(data => {
@@ -165,20 +186,38 @@ function addRole () {
         {
             type: "input",
             name: "title",
-            message: "What is the role name you would like to add?"
+            message: "What is the role name you would like to add?",
+            validate: function(input){
+                if (input === ""){
+                    console.log("Employee Role Required");
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            }
         },
         {
             type: "input",
             name: "salary",
-            message: "What is the role salary?"
+            message: "What is the role salary?",
+            validate: input => {
+                if (!isNaN(input)) {
+                    return true;
+                }
+                return "Please enter a valid number."
+            }
         },
         {
-            type: "input",
-            name: "department_id",
-            message: "What is the department id for this role?"
+            type: "list",
+            name: "department",
+            message: "What is the department for this role?",
+            choices: departmentList
         },
     ]).then((answers) => {
-    connection.promise().query(`INSERT INTO roles set ?`, answers).then(data => {
+        let departmentIndex = departmentList.indexOf(answers.department) + 1;
+        console.log(departmentIndex)
+    connection.promise().query(`INSERT INTO roles set roles.title = ?, roles.salary = ? , roles.department_id = ?`, [answers.title, answers.salary, departmentIndex]).then(data => {
         console.log("inserted role; " + (+data[0].affectedRows > 0))
         main ()
     })
@@ -203,8 +242,7 @@ function updateRole () {
         let roleIndex = roleList.indexOf(answers.role) + 1;
         let employeeIndex = employeeList.indexOf(answers.employee) + 1;
         console.log(roleIndex, employeeIndex)
-        // fix promise query
-    connection.promise().query(`UPDATE employees SET employees.role_id = ? WHERE employees.id= ?`, [roleIndex, employeeIndex]).then(data => {
+    connection.promise().query(`UPDATE employees SET employees.role_id = ? WHERE employees.id = ?`, [roleIndex, employeeIndex]).then(data => {
         console.log("updated employee role; " + (data[0].affectedRows))
         main ()
     })
