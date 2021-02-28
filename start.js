@@ -65,7 +65,7 @@ function main () {
 }
 
 const employeeList = [];
-  connection.query("SELECT * FROM employees ORDER BY employees.last_name", function(err, answer) {
+  connection.query("SELECT * FROM employees", function(err, answer) {
     for (let i = 0; i < answer.length; i++) {
       let employeeString =
         answer[i].id + " " + answer[i].first_name + " " + answer[i].last_name;
@@ -73,8 +73,9 @@ const employeeList = [];
     }
   })
 
+
 const roleList = [];
-  connection.query("SELECT * FROM roles ORDER BY roles.title", function(err, answer) {
+  connection.query("SELECT * FROM roles", function(err, answer) {
     for (let i = 0; i < answer.length; i++) {
       let roleString =
       answer[i].id + " " + answer[i].title;
@@ -91,6 +92,16 @@ const departmentList = [];
     }
   })
 
+const managerList = [];
+  connection.query("SELECT * FROM employees", function(err, answer) {
+    for (let i = 0; i < answer.length; i++) {
+      let managerString =
+        answer[i].id + " " + answer[i].first_name + " " + answer[i].last_name;
+        managerList.push(managerString);
+    }
+        managerList.push("Employee does not have manager");
+})
+
 function viewAllEmployees () {    
     const sql = `SELECT employees.id AS \"ID\", CONCAT (employees.first_name, " " , employees.last_name) AS \"Employee Name\", roles.title AS \"Title\", departments.depName AS \"Department\", roles.salary AS \"Salary\", CONCAT (mgr.first_name, " " , mgr.last_name) AS \"Manager\"
     FROM employees
@@ -99,8 +110,7 @@ function viewAllEmployees () {
     LEFT JOIN departments
     ON roles.department_id = departments.id
     LEFT JOIN employees mgr
-    ON mgr.id = employees.manager_id
-    `;
+    ON mgr.id = employees.manager_id`;
     connection.promise().query(sql).then(data => {
         console.table(data[0])
         main()
@@ -149,17 +159,27 @@ function addEmployee () {
         {
             type: "list",
             name: "manager",
-            message: "Who this employee's manager?",
-            choices: employeeList
+            message: "Who is this employee's manager?",
+            choices: managerList
         },
     ]).then((answers) => {
         let roleIndex = roleList.indexOf(answers.role) + 1;
-        let employeeIndex = employeeList.indexOf(answers.manager) + 1;
-        console.log(roleIndex, employeeIndex)
-    connection.promise().query(`INSERT INTO employees set employees.first_name = ?, employees.last_name = ? , employees.role_id = ?, employees.manager_id = ?`, [answers.first_name, answers.last_name, roleIndex, employeeIndex]).then(data => {
+        let managerIndex = managerList.indexOf(answers.manager) + 1;
+        console.log(roleIndex, managerIndex)
+        if (answers.manager === "Employee does not have manager") {
+            connection.promise().query(`INSERT INTO employees (employees.first_name, employees.last_name, employees.role_id, employees.manager_id) values (?,?,?, null)`, [answers.first_name, answers.last_name, roleIndex, answers.manager]).then(data => {
+                console.log("inserted employees; " + (+data[0].affectedRows > 0))
+                main ()
+            })
+        } else {
+
+
+        connection.promise().query(`INSERT INTO employees set employees.first_name = ?, employees.last_name = ? , employees.role_id = ?, employees.manager_id = ?`, [answers.first_name, answers.last_name, roleIndex, managerIndex]).then(data => {
         console.log("inserted employees; " + (+data[0].affectedRows > 0))
         main ()
+        
     })
+}
 })
 }
 
