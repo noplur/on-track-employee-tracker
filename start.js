@@ -63,10 +63,9 @@ function main () {
         
     })
 }
-// answer[i].id + " " + 
+
 const employeeList = [];
   connection.query("SELECT * FROM employees ORDER BY employees.last_name", function(err, answer) {
-    // console.log(answer);
     for (let i = 0; i < answer.length; i++) {
       let employeeString =
         answer[i].id + " " + answer[i].first_name + " " + answer[i].last_name;
@@ -76,7 +75,6 @@ const employeeList = [];
 
 const roleList = [];
   connection.query("SELECT * FROM roles ORDER BY roles.title", function(err, answer) {
-    // console.log(answer);
     for (let i = 0; i < answer.length; i++) {
       let roleString =
       answer[i].id + " " + answer[i].title;
@@ -86,7 +84,6 @@ const roleList = [];
 
 const departmentList = [];
   connection.query("SELECT * FROM departments", function(err, answer) {
-    // console.log(answer);
     for (let i = 0; i < answer.length; i++) {
       let departmentString =
       answer[i].id + " " + answer[i].depName;
@@ -94,37 +91,16 @@ const departmentList = [];
     }
   })
 
-// const managerNumber = [];
-//   connection.query("SELECT * FROM employees", function(err, answer) {
-//     // console.log(answer);
-//     for (let i = 0; i < answer.length; i++) {
-//       let managerString =
-//       answer[i].id + " " + answer[i].manager_id;
-//       managerNumber.push(managerString);
-//     }
-//   })
-
-// const managerList = [];
-//     connection.query("SELECT * FROM employees", function(err, answer) {
-//     // console.log(answer);
-//     for (let i = 0; i < answer.length; i++) {
-//     let managerListString =
-//     managerNumber + answer[i].first_name + answer[i].last_name;
-//     managerList.push(managerListString);
-//     }
-// })
-
-    // From employees
-    // JOIN employees
-    // ON employees.manager_id = employee.first_name, employee.last_name
-
-function viewAllEmployees () {
-    const sql = `SELECT employees.id AS \"ID\", employees.first_name AS \"First Name\", employees.last_name AS \"Last Name\", roles.title AS \"Title\", departments.depName AS \"Department\", roles.salary AS \"Salary\", employees.manager_id AS \"Manager\"
+function viewAllEmployees () {    
+    const sql = `SELECT employees.id AS \"ID\", CONCAT (employees.first_name, " " , employees.last_name) AS \"Employee Name\", roles.title AS \"Title\", departments.depName AS \"Department\", roles.salary AS \"Salary\", CONCAT (mgr.first_name, " " , mgr.last_name) AS \"Manager\"
     FROM employees
     LEFT JOIN roles
     ON employees.role_id = roles.id
     LEFT JOIN departments
-    ON roles.department_id = departments.id`;
+    ON roles.department_id = departments.id
+    LEFT JOIN employees mgr
+    ON mgr.id = employees.manager_id
+    `;
     connection.promise().query(sql).then(data => {
         console.table(data[0])
         main()
@@ -270,7 +246,3 @@ function updateRole () {
 }
 
 main()
-
-// }
-
-// module.exports = startApp;
