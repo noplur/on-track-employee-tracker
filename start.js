@@ -65,7 +65,7 @@ function main () {
 }
 // answer[i].id + " " + 
 const employeeList = [];
-  connection.query("SELECT * FROM employees", function(err, answer) {
+  connection.query("SELECT * FROM employees ORDER BY employees.last_name", function(err, answer) {
     // console.log(answer);
     for (let i = 0; i < answer.length; i++) {
       let employeeString =
@@ -75,7 +75,7 @@ const employeeList = [];
   })
 
 const roleList = [];
-  connection.query("SELECT * FROM roles", function(err, answer) {
+  connection.query("SELECT * FROM roles ORDER BY roles.title", function(err, answer) {
     // console.log(answer);
     for (let i = 0; i < answer.length; i++) {
       let roleString =
@@ -94,18 +94,32 @@ const departmentList = [];
     }
   })
 
-const managerList = [];
-  connection.query("SELECT * FROM employees", function(err, answer) {
-    // console.log(answer);
-    for (let i = 0; i < answer.length; i++) {
-      let managerString =
-      answer[i].id + " " + answer[i].manager_id;
-      managerList.push(managerString);
-    }
-  })
+// const managerNumber = [];
+//   connection.query("SELECT * FROM employees", function(err, answer) {
+//     // console.log(answer);
+//     for (let i = 0; i < answer.length; i++) {
+//       let managerString =
+//       answer[i].id + " " + answer[i].manager_id;
+//       managerNumber.push(managerString);
+//     }
+//   })
+
+// const managerList = [];
+//     connection.query("SELECT * FROM employees", function(err, answer) {
+//     // console.log(answer);
+//     for (let i = 0; i < answer.length; i++) {
+//     let managerListString =
+//     managerNumber + answer[i].first_name + answer[i].last_name;
+//     managerList.push(managerListString);
+//     }
+// })
+
+    // From employees
+    // JOIN employees
+    // ON employees.manager_id = employee.first_name, employee.last_name
 
 function viewAllEmployees () {
-    const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.depName, roles.salary, employees.manager_id
+    const sql = `SELECT employees.id AS \"ID\", employees.first_name AS \"First Name\", employees.last_name AS \"Last Name\", roles.title AS \"Title\", departments.depName AS \"Department\", roles.salary AS \"Salary\", employees.manager_id AS \"Manager\"
     FROM employees
     LEFT JOIN roles
     ON employees.role_id = roles.id
@@ -118,7 +132,7 @@ function viewAllEmployees () {
 }
 
 function viewAllRoles () {
-    const sql = `SELECT roles.id, roles.title, roles.salary, departments.depName
+    const sql = `SELECT roles.id AS \"ID\", roles.title AS \"Title\", roles.salary AS \"Salary\", departments.depName AS \"Department\"
     FROM roles
     LEFT JOIN departments
     ON roles.department_id = departments.id`;
@@ -129,7 +143,8 @@ function viewAllRoles () {
 }
 
 function viewAllDepartments () {
-    const sql = `SELECT * FROM departments`
+    const sql = `SELECT departments.id AS \"ID\", departments.depName AS \"Department\"
+    FROM departments`
     connection.promise().query(sql).then(data => {
         console.table(data[0])
         main()
@@ -150,23 +165,28 @@ function addEmployee () {
             message: "What is the employee's last name?"
         },
         {
-            type: "input",
-            name: "role_id",
-            message: "What is the role id for this employee?"
+            type: "list",
+            name: "role",
+            message: "What is this employee's role?",
+            choices: roleList
         },
         {
             type: "list",
-            name: "manager_id",
-            message: "What is the manager id for this employee?",
-            choices: managerList
+            name: "manager",
+            message: "Who this employee's manager?",
+            choices: employeeList
         },
     ]).then((answers) => {
-    connection.promise().query(`INSERT INTO employees set ?`, answers).then(data => {
+        let roleIndex = roleList.indexOf(answers.role) + 1;
+        let employeeIndex = employeeList.indexOf(answers.manager) + 1;
+        console.log(roleIndex, employeeIndex)
+    connection.promise().query(`INSERT INTO employees set employees.first_name = ?, employees.last_name = ? , employees.role_id = ?, employees.manager_id = ?`, [answers.first_name, answers.last_name, roleIndex, employeeIndex]).then(data => {
         console.log("inserted employees; " + (+data[0].affectedRows > 0))
         main ()
     })
 })
 }
+
 function addDepartment () {
     inquirer.prompt([
         {
