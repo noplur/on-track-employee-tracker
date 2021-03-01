@@ -35,10 +35,11 @@ db.on('open', () => {
 
 const connection = mysql.createConnection({host: "localhost", user: "root", password: "rosenblatt1234!", database: "departments"})
 
-// function startApp () {
+// function to start App () {
 
 function main () {
     inquirer.prompt([
+        // menu questions
         {type: "list",
         name: "initialchoice",
         message: "What do you want to do",
@@ -46,6 +47,7 @@ function main () {
         }
     ])
     .then((answers) => {
+        // functions linked to menu questions
         if (answers.initialchoice === "View all employees") {
             viewAllEmployees ();
         } else if (answers.initialchoice === "View all roles") {
@@ -91,6 +93,7 @@ function main () {
     })
 }
 
+// variable to display employee list
 const employeeList = [];
   connection.query("SELECT * FROM employees", function(err, answer) {
     for (let i = 0; i < answer.length; i++) {
@@ -99,7 +102,8 @@ const employeeList = [];
         employeeList.push(employeeString);
     }
   })
-
+  
+// variable to display department list
 const departmentList = [];
   connection.query("SELECT * FROM departments", function(err, answer) {
     for (let i = 0; i < answer.length; i++) {
@@ -109,6 +113,7 @@ const departmentList = [];
     }
   })
 
+// variable to display manager list
 const managerList = [];
   connection.query("SELECT * FROM employees", function(err, answer) {
     for (let i = 0; i < answer.length; i++) {
@@ -119,6 +124,7 @@ const managerList = [];
         managerList.push("Employee does not have manager");
 })
 
+// function for table to view all employees
 function viewAllEmployees () {    
     const sql = `SELECT employees.id AS \"ID\", CONCAT (employees.first_name, " " , employees.last_name) AS \"Employee Name\", roles.title AS \"Title\", departments.depName AS \"Department\", roles.salary AS \"Salary\", CONCAT (mgr.first_name, " " , mgr.last_name) AS \"Manager\"
     FROM employees
@@ -134,6 +140,7 @@ function viewAllEmployees () {
     })
 }
 
+// function for table to view all employees by Manager
 function viewEmployeeByManager() {
     const sql = `SELECT employees.id AS \"ID\", CONCAT (mgr.first_name, " " , mgr.last_name) AS \"Manager\", CONCAT (employees.first_name, " " , employees.last_name) AS \"Employee Name\", roles.title AS \"Title\", departments.depName AS \"Department\", roles.salary AS \"Salary\"
     FROM employees
@@ -150,6 +157,7 @@ function viewEmployeeByManager() {
     })
 }
 
+// function for table to view all employees by Department
 function viewEmployeeByDepartment() {
     const sql = `SELECT employees.id AS \"ID\", departments.depName AS \"Department\", CONCAT (employees.first_name, " " , employees.last_name) AS \"Employee Name\", roles.title AS \"Title\", roles.salary AS \"Salary\", CONCAT (mgr.first_name, " " , mgr.last_name) AS \"Manager\"
     FROM employees
@@ -166,6 +174,7 @@ function viewEmployeeByDepartment() {
     })
 }
 
+// function for table to view all roles
 function viewAllRoles () {
     const sql = `SELECT roles.id AS \"ID\", roles.title AS \"Title\", roles.salary AS \"Salary\", departments.depName AS \"Department\"
     FROM roles
@@ -177,6 +186,7 @@ function viewAllRoles () {
     })
 }
 
+// function for table to view all departments
 function viewAllDepartments () {
     const sql = `SELECT departments.id AS \"ID\", departments.depName AS \"Department\"
     FROM departments`
@@ -186,6 +196,7 @@ function viewAllDepartments () {
     })
 }
 
+// function to add a department
 function addDepartment () {
     inquirer.prompt([
         {
@@ -201,6 +212,7 @@ function addDepartment () {
 })
 }
 
+// function to delete a department
 function deleteDepartment() {
     inquirer.prompt([
         {
@@ -219,7 +231,9 @@ function deleteDepartment() {
 })
 }
 
+// function to add a role
 function addRole () {
+    // variable to display department list is repeated in case of any additions/changes
     const departmentList = [];
     connection.query("SELECT * FROM departments", function(err, answer) {
     for (let i = 0; i < answer.length; i++) {
@@ -270,6 +284,7 @@ function addRole () {
 })
 }
 
+// function to delete a role
 function deleteRole() {
     inquirer.prompt([
         {
@@ -288,6 +303,7 @@ function deleteRole() {
 })
 }
 
+// variable to display list of roles
 const roleList = [];
   connection.query("SELECT * FROM roles", function(err, answer) {
     for (let i = 0; i < answer.length; i++) {
@@ -297,6 +313,7 @@ const roleList = [];
     }
   })
 
+  // function to add an employee
 function addEmployee () {
     const roleList = [];
   connection.query("SELECT * FROM roles", function(err, answer) {
@@ -334,6 +351,7 @@ function addEmployee () {
         let roleIndex = roleList.indexOf(answers.role) + 1;
         let managerIndex = managerList.indexOf(answers.manager) + 1;
         console.log(roleIndex, managerIndex)
+        // insert new employee into table
         if (answers.manager === "Employee does not have manager") {
             connection.promise().query(`INSERT INTO employees (employees.first_name, employees.last_name, employees.role_id, employees.manager_id) values (?,?,?, null)`, [answers.first_name, answers.last_name, roleIndex, answers.manager]).then(data => {
                 console.log("inserted employees; " + (+data[0].affectedRows > 0))
@@ -348,6 +366,7 @@ function addEmployee () {
 })
 }
 
+  // function to delete an employee
 function deleteEmployee() {
     inquirer.prompt([
         {
@@ -366,6 +385,7 @@ function deleteEmployee() {
 })
 }
 
+  // function to update a role
 function updateRole () {
     inquirer.prompt([
         {
@@ -391,6 +411,7 @@ function updateRole () {
 })
 }
 
+  // function to update a manager
 function updateManager () {
     inquirer.prompt([
         {
@@ -424,6 +445,7 @@ function updateManager () {
     })
     }
 
+// function to display the total sum of all salaries
 function salarySum() {
     const sql = `SELECT SUM(roles.salary) AS \"Combined Salaries of All Employees\" FROM roles`;
     connection.promise().query(sql).then(data => {
@@ -432,9 +454,11 @@ function salarySum() {
     })
 }
 
+// function to exit
 function exitMenu () {
     console.log("Thank you for using the On-Track Employee Tracker!")
     process.exit();
 }
 
+// start App
 main()
