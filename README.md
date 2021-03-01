@@ -7,6 +7,8 @@
 
 #### When the user opts to add a department, the name of that department is added to the database. Adding a role allows the user to enter the role name, salary and department. If the user chooses to add an employee a prompt asks the employee to enter the first name, last name, role and the new employee's manager. If the new employee does not have a manager there is an option to select no manager. Finally, the user can update an employee role and prompts allow the user to select an employee from a list, update their new role and their new manager (if there is a manager).
 
+#### To use On Track Employee Tracker, clone the [app](https://github.com/noplur/on-track-employee-tracker), use Terminal to go to the On Track Employee Tracker's root directory and enter "node start.js" and follow the prompts. 
+
 ### The On Track Employee Tracker walk-through video can be viewed here: https://drive.google.com/file/d/1KIJ-gY6lUBIn8J8giMr6pCmfG7s0ckrt/view
 
 ### The GitHub repository for the On Track Employee Tracker can be viewed here: https://github.com/noplur/on-track-employee-tracker
