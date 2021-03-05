@@ -96,6 +96,7 @@ function main () {
 // variable to display employee list
 const employeeList = [];
   connection.query("SELECT * FROM employees", function(err, answer) {
+    if (err) throw err 
     for (let i = 0; i < answer.length; i++) {
       let employeeString =
         answer[i].id + " " + answer[i].first_name + " " + answer[i].last_name;
@@ -222,7 +223,7 @@ function deleteDepartment() {
             choices: departmentList
         }
     ]).then((answers) => {
-        let departmentIndex = departmentList.indexOf(answers.depName) + 1;
+        let departmentIndex = parseInt(answers.depName.split(" ")[0]);
         console.log(departmentIndex, answers.id, answers.depName)
         connection.promise().query("DELETE FROM departments WHERE departments.id = ?", [departmentIndex]).then(data => {
         console.log("deleted department; " + (data[0].affectedRows > 0))
