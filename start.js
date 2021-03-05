@@ -276,7 +276,7 @@ function addRole () {
             choices: departmentList
         },
     ]).then((answers) => {
-        let departmentIndex = departmentList.indexOf(answers.department) + 1;
+        let departmentIndex = parseInt(answers.department.split(" ")[0]);
         console.log(departmentIndex)
     connection.promise().query(`INSERT INTO roles set roles.title = ?, roles.salary = ? , roles.department_id = ?`, [answers.title, answers.salary, departmentIndex]).then(data => {
         console.log("inserted role; " + (+data[0].affectedRows > 0))
@@ -295,7 +295,7 @@ function deleteRole() {
             choices: roleList
         }
     ]).then((answers) => {
-        let roleIndex = roleList.indexOf(answers.role) + 1;
+        let roleIndex = parseInt(answers.role.split(" ")[0]);
         console.log(roleIndex, answers.id, answers.role)
         connection.promise().query("DELETE FROM roles WHERE roles.id = ?", [roleIndex]).then(data => {
         console.log("deleted role; " + (data[0].affectedRows > 0))
@@ -349,8 +349,8 @@ function addEmployee () {
             choices: managerList
         },
     ]).then((answers) => {
-        let roleIndex = roleList.indexOf(answers.role) + 1;
-        let managerIndex = managerList.indexOf(answers.manager) + 1;
+        let roleIndex = parseInt(answers.role.split(" ")[0]);
+        let managerIndex = parseInt(answers.manager.split(" ")[0]);
         console.log(roleIndex, managerIndex)
         // insert new employee into table
         if (answers.manager === "Employee does not have manager") {
@@ -377,7 +377,7 @@ function deleteEmployee() {
             choices: employeeList
         }
     ]).then((answers) => {
-        let employeeIndex = employeeList.indexOf(answers.employee) + 1;
+        let employeeIndex = parseInt(answers.employee.split(" "));
         console.log(employeeIndex, answers.id, answers.employee)
         connection.promise().query("DELETE FROM employees WHERE employees.id = ?", [employeeIndex]).then(data => {
         console.log("deleted employee; " + (data[0].affectedRows > 0))
@@ -402,8 +402,8 @@ function updateRole () {
             choices: roleList
         },
     ]).then((answers) => {
-        let roleIndex = roleList.indexOf(answers.role) + 1;
-        let employeeIndex = employeeList.indexOf(answers.employee) + 1;
+        let roleIndex = parseInt(answers.role.split(" ")[0]);
+        let employeeIndex = parseInt(answers.employee.split(" ")[0]);
         console.log(roleIndex, employeeIndex)
     connection.promise().query(`UPDATE employees SET employees.role_id = ? WHERE employees.id = ?`, [roleIndex, employeeIndex]).then(data => {
         console.log("updated employee role; " + (data[0].affectedRows))
@@ -428,8 +428,8 @@ function updateManager () {
             choices: managerList
         },
     ]).then((answers) => {
-        let employeeIndex = employeeList.indexOf(answers.employee) + 1;
-        let mgrIndex = managerList.indexOf(answers.mgr) + 1;
+        let employeeIndex = parseInt(answers.employee.split(" ")[0]);
+        let mgrIndex = parseInt(answers.mgr.split(" ")[0]);
         console.log(mgrIndex, employeeIndex)
 
         if (answers.mgr === "Employee does not have manager") {
